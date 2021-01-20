@@ -61,9 +61,13 @@ def build_cone(axis, parity):
     """
     if parity not in [0, 1]:
         raise f"Please set parity to `1` or `0`, not {parity}."
+    if axis not in ["x", "y", "z"]:
+        raise f"Please set axis to `x`, `y` or `z`, not {axis}."
 
     wires = []
     neg = 1 if parity else -1
+    # Determine which of the x, y and z axes are the primary axis/secondary axes
+    # Primary axes is that which the cone is symmetric about
     x = 0 if axis == "x" else 1 if axis == "y" else 2
     y = 2 if axis == "x" else 0 if axis == "y" else 1
     z = 1 if axis == "x" else 2 if axis == "y" else 0
@@ -73,6 +77,7 @@ def build_cone(axis, parity):
     # Rotate ray about x axis
     dtheta = 2 * pi / num_rays
     for ind in range(num_rays):
+        # Primary axis and 1st and 2nd secondary axes, the start and end positions of wire
         prim_axis = (
             f"{neg}*cone_offset",
             f"{neg}*(cone_offset + length)",
@@ -89,15 +94,15 @@ def build_cone(axis, parity):
 
         wires.append(
             [
-                "1",
-                "1",
-                "originx +" + axes[x][0],
-                "originy +" + axes[y][0],
-                "originz +" + axes[z][0],
-                "originx +" + axes[x][1],
-                "originy +" + axes[y][1],
-                "originz +" + axes[z][1],
-                "0.01",
+                "1",  # Tag
+                "1",  # Number of segments
+                "originx +" + axes[x][0],  # x init
+                "originy +" + axes[y][0],  # y init
+                "originz +" + axes[z][0],  # z init
+                "originx +" + axes[x][1],  # x final
+                "originy +" + axes[y][1],  # y final
+                "originz +" + axes[z][1],  # z final
+                "0.01",  # Wire radius
             ]
         )
 
@@ -109,6 +114,7 @@ def build_cone(axis, parity):
     for ind in range(num_rings):
         offset = f"{ind * dlength}"
         for ind in range(num_rays):
+            # Primary axis and 1st and 2nd secondary axes
             prim_axis = (
                 f"{neg}*(cone_offset + {offset})",
                 f"{neg}*(cone_offset + {offset})",
@@ -125,15 +131,15 @@ def build_cone(axis, parity):
 
             wires.append(
                 [
-                    "1",
-                    "1",
-                    "originx +" + axes[x][0],
-                    "originy +" + axes[y][0],
-                    "originz +" + axes[z][0],
-                    "originx +" + axes[x][1],
-                    "originy +" + axes[y][1],
-                    "originz +" + axes[z][1],
-                    "0.01",
+                    "1",  # Tag
+                    "1",  # Number of segments
+                    "originx +" + axes[x][0],  # x init
+                    "originy +" + axes[y][0],  # y init
+                    "originz +" + axes[z][0],  # z init
+                    "originx +" + axes[x][1],  # x final
+                    "originy +" + axes[y][1],  # y final
+                    "originz +" + axes[z][1],  # z final
+                    "0.01",  # Wire radius
                 ]
             )
 
