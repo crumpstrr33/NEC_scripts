@@ -1,14 +1,30 @@
+"""
+Running `python bicone.py` creates a .nec file for a bicone antenna. It uses
+the following parameters:
+
+    origin: The (x,y,z) point about which it is centered
+    cone_offset: How far from the center the cone starts
+    num_rays: How fine of a circle the cone is, `n` rays would mean a n-gon
+                representation of the circle
+    num_rings: How dense the cone is with wire, since NEC can't model planes,
+                this representes how many rings along the axis make up the cone
+    theta: The angle of the cone, at >pi/4, the cone could intersect with other
+            cones (if there are multiple bicones present)
+    length: The length of the cone along the axis
+    init_rad: The inital radius of the cone (since it doesn't start at an exact point
+                like a cone mathematically would do)
+"""
 from math import pi
 
 from build_nec_file import build_nec_file
 
-num_rays = 100
-num_rings = 25
 origin = (0.0, 0.0, 0.0)
 cone_offset = 0.3
-init_rad = 0.1
+num_rays = 100
+num_rings = 25
 theta = pi / 4
 length = 1
+init_rad = 0.1
 
 
 CONSTANTS = {
@@ -16,10 +32,10 @@ CONSTANTS = {
     "originy": origin[1],
     "originz": origin[2],
     "cone_offset": cone_offset,
+    "num_rays": num_rays,
+    "num_rings": num_rings,
     "theta": theta,
     "length": length,
-    "num_rings": num_rings,
-    "num_rays": num_rays,
     "init_rad": init_rad,
 }
 
