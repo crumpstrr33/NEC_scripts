@@ -68,6 +68,6 @@ def build_nec_file(comments, wires, constants, output="output"):
     for comment in comments:
         print(" " * 8 + f"{comment}")
     print(
-        f"\nWrote {len(wires)} wires to {output}.nec in d"
+        f"\nWrote {len(wires)} wires to {output}.nec in "
         + f"{(dt_end - dt_start).total_seconds() * 1000:.3f}ms."
     )

@@ -129,15 +129,15 @@ if __name__ == "__main__":
     wires_pos_x = build_cone("x", 1)
     wires_neg_y = build_cone("y", 0)
     wires_pos_y = build_cone("y", 1)
-    # wires_neg_z = build_cone("z", 0)
-    # wires_pos_z = build_cone("z", 1)
+    wires_neg_z = build_cone("z", 0)
+    wires_pos_z = build_cone("z", 1)
 
-    wires = (
+    tripole_bicone = (
         wires_neg_x
         + wires_pos_x
         + wires_neg_y
         + wires_pos_y
-        # + wires_neg_z
-        # + wires_pos_z
+        + wires_neg_z
+        + wires_pos_z
     )
-    build_nec_file(COMMENTS, wires, CONSTANTS)
+    build_nec_file(COMMENTS, tripole_bicone, CONSTANTS)
