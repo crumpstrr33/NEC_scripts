@@ -55,7 +55,7 @@ def build_nec_file(comments, wires, constants, output="output"):
             gw_str += f"{val.rjust(rlim):<{rlim}}"
         nec_file.append(gw_str)
     # Wire end
-    nec_file.append("GE 0")
+    nec_file.append("GE  0")
     # File end
     nec_file.append("EN\n")
 
