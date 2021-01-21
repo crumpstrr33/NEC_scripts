@@ -44,7 +44,7 @@ def reformat(necf, new_necf):
                 # Grab all variables
                 if line.startswith("SY"):
                     editted_line = True
-                    gw_str = ""
+                    row_str = ""
                     # Assumes form SY <var> = <val>
                     sy_vars[line.split(" ")[1]] = line.split(" ")[3].strip("\n")
 
@@ -54,7 +54,7 @@ def reformat(necf, new_necf):
                     # Remove all whitespace to create list of parameters
                     params = re.sub(r"[ ]+", " ", line.strip("\n")).split(" ")
 
-                    gw_str = ""
+                    row_str = ""
                     for ind, param in enumerate(params):
                         # Replaces variables with the values
                         for sy_key, sy_val in sy_vars.items():
@@ -69,12 +69,12 @@ def reformat(necf, new_necf):
                         # Doesn't evaluate 0th index param cause that's card type
                         if ind:
                             param = str(eval(param))
-                        gw_str += f"{param.rjust(rlim):<{rlim}}"
+                        row_str += f"{param.rjust(rlim):<{rlim}}"
                     # print(s)
-                    gw_str += "\n"
+                    row_str += "\n"
 
                 if editted_line:
-                    new_lines.write(gw_str)
+                    new_lines.write(row_str)
                 else:
                     new_lines.write(line)
 
