@@ -20,9 +20,9 @@ from build_nec_file import build_nec_file
 
 origin = (0.0, 0.0, 0.0)
 cone_offset = 0.03
-num_rays = 10
-num_rings = 6
-theta = 50 * pi / 180  # pi / 4
+num_rays = 50
+num_rings = 10
+theta = 50 * (pi / 180)  # In degrees to be converted
 length = 1
 init_rad = 0.06
 wire_rad = 0.001
@@ -44,12 +44,12 @@ CONSTANTS = {
 COMMENTS = [
     "Bicone made with bicone.py",
     f"Origin: ({origin[0]:.3f}, {origin[1]:.3f}, {origin[2]:.3f})",
-    f"Cone offset: {cone_offset:.3f}",
-    f"Cone angle: {theta:.3f}",
-    f"Cone length: {length:.3f}",
+    f"Cone offset: {cone_offset:.3f}m",
+    f"Cone angle: {theta:.3f}rads",
+    f"Cone length: {length:.3f}m",
     f"Number of rings: {num_rings}",
     f"Number of rays: {num_rays}",
-    f"Cone initial radius: {init_rad:.3f}",
+    f"Cone initial radius: {init_rad:.3f}m",
 ]
 
 WIRES = [
@@ -67,7 +67,7 @@ WIRES = [
 ]
 
 EXCITATIONS = [["0", "999", "1", "00", "1", "0"]]
-RAD_PATTERN = ["0", "45", "180", "1000", "0", "0", "2", "2"]
+RAD_PATTERN = ["0", "45", "181", "1000", "0", "0", "2", "2"]
 
 
 def build_cone(axis, parity, wires=[]):
