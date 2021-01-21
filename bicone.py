@@ -96,6 +96,7 @@ def build_cone(axis, parity, wires=[]):
     # Rotate ray about x axis
     dtheta = 2 * pi / num_rays
     for ind in range(num_rays):
+        for 
         # Primary axis and 1st and 2nd secondary axes, the start and end positions of wire
         prim_axis = (
             f"{neg}*cone_offset",
@@ -130,21 +131,21 @@ def build_cone(axis, parity, wires=[]):
     # afterwards rotates just like above. The y, z endpoints are just the proceeding
     # ray to connect to
     dlength = length / (num_rings - 1)
-    for ind in range(num_rings):
-        offset = f"{ind * dlength}"
-        for ind in range(num_rays):
+    for ring_ind in range(num_rings):
+        offset = f"{ring_ind * dlength}"
+        for ray_ind in range(num_rays):
             # Primary axis and 1st and 2nd secondary axes
             prim_axis = (
                 f"{neg}*(cone_offset + {offset})",
                 f"{neg}*(cone_offset + {offset})",
             )
             sec1_axis = (
-                f"({offset}*tan(theta) + init_rad)*cos({ind*dtheta})",
-                f"({offset}*tan(theta) + init_rad)*cos({((ind + 1) % num_rays)*dtheta})",
+                f"({offset}*tan(theta) + init_rad)*cos({ray_ind*dtheta})",
+                f"({offset}*tan(theta) + init_rad)*cos({((ray_ind + 1) % num_rays)*dtheta})",
             )
             sec2_axis = (
-                f"({offset}*tan(theta) + init_rad)*sin({ind*dtheta})",
-                f"({offset}*tan(theta) + init_rad)*sin({((ind + 1) % num_rays)*dtheta})",
+                f"({offset}*tan(theta) + init_rad)*sin({ray_ind*dtheta})",
+                f"({offset}*tan(theta) + init_rad)*sin({((ray_ind + 1) % num_rays)*dtheta})",
             )
             axes = (prim_axis, sec1_axis, sec2_axis)
 
