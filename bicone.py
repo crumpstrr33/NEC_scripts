@@ -19,12 +19,13 @@ from math import pi
 from build_nec_file import build_nec_file
 
 origin = (0.0, 0.0, 0.0)
-cone_offset = 0.3
-num_rays = 100
-num_rings = 25
-theta = pi / 4
+cone_offset = 0.03
+num_rays = 10
+num_rings = 6
+theta = 50 * pi / 180  # pi / 4
 length = 1
-init_rad = 0.1
+init_rad = 0.06
+wire_rad = 0.001
 
 
 CONSTANTS = {
@@ -37,6 +38,7 @@ CONSTANTS = {
     "theta": theta,
     "length": length,
     "init_rad": init_rad,
+    "wire_rad": wire_rad,
 }
 
 COMMENTS = [
@@ -50,21 +52,38 @@ COMMENTS = [
     f"Cone initial radius: {init_rad:.3f}",
 ]
 
+WIRES = [
+    [
+        "999",
+        "1",
+        "0",
+        "0",
+        "originz + cone_offset",
+        "0",
+        "0",
+        "originz - cone_offset",
+        "wire_rad",
+    ],
+]
 
-def build_cone(axis, parity):
+EXCITATIONS = [["0", "999", "1", "00", "1", "0"]]
+RAD_PATTERN = ["0", "45", "180", "1000", "0", "0", "2", "2"]
+
+
+def build_cone(axis, parity, wires=[]):
     """
     Creates a cone in a direction along an axis.
 
     Parameters:
     axis - The axis which the cone is along, either `x`, `y`, `z`
     partiy - Which direction to face, either 0 for negative or 1 for positive
+    wires (default []) - The list of wires to add to
     """
     if parity not in [0, 1]:
         raise f"Please set parity to `1` or `0`, not {parity}."
     if axis not in ["x", "y", "z"]:
         raise f"Please set axis to `x`, `y` or `z`, not {axis}."
 
-    wires = []
     neg = 1 if parity else -1
     # Determine which of the x, y and z axes are the primary axis/secondary axes
     # Primary axes is that which the cone is symmetric about
@@ -102,7 +121,7 @@ def build_cone(axis, parity):
                 "originx +" + axes[x][1],  # x final
                 "originy +" + axes[y][1],  # y final
                 "originz +" + axes[z][1],  # z final
-                "0.01",  # Wire radius
+                "wire_rad",  # Wire radius
             ]
         )
 
@@ -139,7 +158,7 @@ def build_cone(axis, parity):
                     "originx +" + axes[x][1],  # x final
                     "originy +" + axes[y][1],  # y final
                     "originz +" + axes[z][1],  # z final
-                    "0.01",  # Wire radius
+                    "wire_rad",  # Wire radius
                 ]
             )
 
@@ -147,19 +166,11 @@ def build_cone(axis, parity):
 
 
 if __name__ == "__main__":
-    wires_neg_x = build_cone("x", 0)
-    wires_pos_x = build_cone("x", 1)
-    wires_neg_y = build_cone("y", 0)
-    wires_pos_y = build_cone("y", 1)
-    wires_neg_z = build_cone("z", 0)
-    wires_pos_z = build_cone("z", 1)
+    # WIRES = build_cone("x", 0, WIRES)
+    # WIRES = build_cone("x", 1, WIRES)
+    # WIRES = build_cone("y", 0, WIRES)
+    # WIRES = build_cone("y", 1, WIRES)
+    WIRES = build_cone("z", 0, WIRES)
+    WIRES = build_cone("z", 1, WIRES)
 
-    tripole_bicone = (
-        wires_neg_x
-        + wires_pos_x
-        + wires_neg_y
-        + wires_pos_y
-        + wires_neg_z
-        + wires_pos_z
-    )
-    build_nec_file(COMMENTS, tripole_bicone, CONSTANTS)
+    build_nec_file(COMMENTS, WIRES, CONSTANTS, EXCITATIONS, RAD_PATTERN)
