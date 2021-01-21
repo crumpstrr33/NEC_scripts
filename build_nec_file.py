@@ -9,7 +9,9 @@ from math import *
 LIMS = [2, 5, 10, 20, 30, 40, 50, 60, 70, 80]
 
 
-def build_nec_file(comments, wires, constants, output="output"):
+def build_nec_file(
+    comments, wires, constants, excitations=[], rad_pattern=[], output="output"
+):
     """
     Creates a `.nec` file. The values can contain arithmetic in it. Anything
     that Python's `eval` can handle and any function in the `math` package,
@@ -24,9 +26,34 @@ def build_nec_file(comments, wires, constants, output="output"):
                 in another. For example, you cannot have 'offset' and
                 'origin_offset' because 'offset' can be found (via Python's
                 `replace` method in 'origin_offset')
+    excitations (default []) - List for EX cards, cards that define excitations,
+                                e.g. voltage sources
+    rad_pattern (default []) - The RP card which defines how to calculate the
+                                the radiation pattern
     output (default `output`) - The name of the output `.nec` file, the
                                 extension is automatically added
     """
+
+    def _format_rows(rows, card, scinot_ind):
+        for row in rows:
+            row_str = card
+            for ind, param in enumerate(row):
+                # Replace constants with values
+                for const_key, const_val in constants.items():
+                    param = param.replace(const_key, str(const_val))
+
+                # Add to line correctly formatted
+                rlim = LIMS[ind + 1] - LIMS[ind]
+                if ind > (scinot_ind - 1):
+                    # Change to 3-digit rounded scientific notation
+                    val = f"{eval(param):.2e}"
+                else:
+                    # Otherwise just evaluate, e.g. tag number
+                    val = str(eval(param))
+                # Add to string and push the rightmost it can go
+                row_str += f"{val.rjust(rlim):<{rlim}}"
+            nec_file.append(row_str)
+
     dt_start = dt.now()
     nec_file = []
     # Add comments
@@ -36,26 +63,13 @@ def build_nec_file(comments, wires, constants, output="output"):
     nec_file.append("CE")
 
     # Add wires
-    for wire in wires:
-        gw_str = "GW"
-        for ind, param in enumerate(wire):
-            # Replace constants with values
-            for const_key, const_val in constants.items():
-                param = param.replace(const_key, str(const_val))
-
-            # Add to line correctly formatted
-            rlim = LIMS[ind + 1] - LIMS[ind]
-            if ind > 1:
-                # Change to 3-digit rounded scientific notation
-                val = f"{eval(param):.2e}"
-            else:
-                # Otherwise just evaluate, e.g. tag number
-                val = str(eval(param))
-            # Add to string and push the rightmost it can go
-            gw_str += f"{val.rjust(rlim):<{rlim}}"
-        nec_file.append(gw_str)
+    _format_rows(rows=wires, card="GW", scinot_ind=2)
     # Wire end
     nec_file.append("GE  0")
+    # Excitations
+    _format_rows(rows=excitations, card="EX", scinot_ind=4)
+    # Radation pattern,
+    _format_rows(rows=[rad_pattern], card="RP", scinot_ind=8)
     # File end
     nec_file.append("EN\n")
 
