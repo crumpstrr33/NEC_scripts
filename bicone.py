@@ -91,46 +91,46 @@ def build_cone(axis, parity, wires=[]):
     y = 2 if axis == "x" else 0 if axis == "y" else 1
     z = 1 if axis == "x" else 2 if axis == "y" else 0
 
-    # Rays start at (x, y) = (cone_offset, init_rad)
-    # End at (x, y) = (cone_offset + length, init_rad + length*tan(theta))
-    # Rotate ray about x axis
+    # Change in angle between rays
     dtheta = 2 * pi / num_rays
-    for ind in range(num_rays):
-        for 
-        # Primary axis and 1st and 2nd secondary axes, the start and end positions of wire
-        prim_axis = (
-            f"{neg}*cone_offset",
-            f"{neg}*(cone_offset + length)",
-        )
-        sec1_axis = (
-            f"init_rad*cos({ind*dtheta})",
-            f"(init_rad + length*tan(theta))*cos({ind*dtheta})",
-        )
-        sec2_axis = (
-            f"init_rad*sin({ind*dtheta})",
-            f"(init_rad + length*tan(theta))*sin({ind*dtheta})",
-        )
-        axes = (prim_axis, sec1_axis, sec2_axis)
+    # Change in length between rings
+    dlength = length / (num_rings - 1)
 
-        wires.append(
-            [
-                "1",  # Tag
-                "1",  # Number of segments
-                "originx +" + axes[x][0],  # x init
-                "originy +" + axes[y][0],  # y init
-                "originz +" + axes[z][0],  # z init
-                "originx +" + axes[x][1],  # x final
-                "originy +" + axes[y][1],  # y final
-                "originz +" + axes[z][1],  # z final
-                "wire_rad",  # Wire radius
-            ]
-        )
+    # Add the rays, create num_rings-1 wires for each ray, so each interaction
+    # point is of 4 wires. The offset*tan(theta) term compensates for the increase
+    # in height along the ray, the cosine and sine terms then appropriately rotate them
+    for ring_ind in range(num_rings - 1):
+        offsets = (f"{ring_ind * dlength}", f"{(ring_ind + 1) * dlength}")
+        for ray_ind in range(num_rays):
+            prim_axis = (
+                f"{neg}*(cone_offset + {offsets[0]})",
+                f"{neg}*(cone_offset + {offsets[1]})",
+            )
+            sec1_axis = (
+                f"({offsets[0]}*tan(theta) + init_rad)*cos({ray_ind*dtheta})",
+                f"({offsets[1]}*tan(theta) + init_rad)*cos({ray_ind*dtheta})",
+            )
+            sec2_axis = (
+                f"({offsets[0]}*tan(theta) + init_rad)*sin({ray_ind*dtheta})",
+                f"({offsets[1]}*tan(theta) + init_rad)*sin({ray_ind*dtheta})",
+            )
+            axes = (prim_axis, sec1_axis, sec2_axis)
+
+            wires.append(
+                [
+                    "1",  # Tag
+                    "1",  # Number of segments
+                    "originx +" + axes[x][0],  # x init
+                    "originy +" + axes[y][0],  # y init
+                    "originz +" + axes[z][0],  # z init
+                    "originx +" + axes[x][1],  # x final
+                    "originy +" + axes[y][1],  # y final
+                    "originz +" + axes[z][1],  # z final
+                    "wire_rad",  # Wire radius
+                ]
+            )
 
     # Connects rays
-    # The {offset}*tan(theta) is location on ray it connects, the cosine/sine
-    # afterwards rotates just like above. The y, z endpoints are just the proceeding
-    # ray to connect to
-    dlength = length / (num_rings - 1)
     for ring_ind in range(num_rings):
         offset = f"{ring_ind * dlength}"
         for ray_ind in range(num_rays):
@@ -167,10 +167,6 @@ def build_cone(axis, parity, wires=[]):
 
 
 if __name__ == "__main__":
-    # WIRES = build_cone("x", 0, WIRES)
-    # WIRES = build_cone("x", 1, WIRES)
-    # WIRES = build_cone("y", 0, WIRES)
-    # WIRES = build_cone("y", 1, WIRES)
     WIRES = build_cone("z", 0, WIRES)
     WIRES = build_cone("z", 1, WIRES)
 
