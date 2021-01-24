@@ -1,7 +1,8 @@
 """
 This script uses python to build a `.nec` file. This allows
 for the use of variables and other arithmetic which is much
-easier in python.
+easier in python. For information on the cards specified by the
+arguments, e.g. EX or RP, check out https://www.nec2.org/part_3/cards/
 """
 from datetime import datetime as dt
 from math import *
@@ -10,7 +11,13 @@ LIMS = [2, 5, 10, 20, 30, 40, 50, 60, 70, 80]
 
 
 def build_nec_file(
-    comments, wires, constants, excitations=[], rad_pattern=[], output="output"
+    comments,
+    wires,
+    constants,
+    frequency=[],
+    excitations=[],
+    rad_pattern=[],
+    output="output",
 ):
     """
     Creates a `.nec` file. The values can contain arithmetic in it. Anything
@@ -26,6 +33,7 @@ def build_nec_file(
                 in another. For example, you cannot have 'offset' and
                 'origin_offset' because 'offset' can be found (via Python's
                 `replace` method in 'origin_offset')
+    frequency (default []) -
     excitations (default []) - List for EX cards, cards that define excitations,
                                 e.g. voltage sources
     rad_pattern (default []) - The RP card which defines how to calculate the
@@ -66,6 +74,8 @@ def build_nec_file(
     _format_rows(rows=wires, card="GW", scinot_ind=2)
     # Wire end
     nec_file.append("GE  0")
+    # Frequency
+    _format_rows(rows=[frequency], card="FR", scinot_ind=4)
     # Excitations
     _format_rows(rows=excitations, card="EX", scinot_ind=4)
     # Radation pattern,
