@@ -18,14 +18,14 @@ from math import pi
 
 from build_nec_file import build_nec_file
 
+cone_offset = 0.004
+num_rays = 10
+num_rings = 6
+theta = 40 * (pi / 180)  # In degrees to be converted
+length = 0.13
+init_rad = 0.007
+wire_rad = 0.004
 origin = (0.0, 0.0, 0.0)
-cone_offset = 0.03
-num_rays = 20
-num_rings = 10
-theta = 50 * (pi / 180)  # In degrees to be converted
-length = 1
-init_rad = 0.06
-wire_rad = 0.001
 
 CONSTANTS = {
     "originx": origin[0],
@@ -56,16 +56,17 @@ WIRES = [
         "999",
         "1",
         "0",
-        "0",
+        "init_rad",
         "originz + cone_offset",
         "0",
-        "0",
+        "init_rad",
         "originz - cone_offset",
         "wire_rad",
     ],
 ]
 
-FREQUENCY = ["0", "299", "0", "0", "1", "1"]
+
+FREQUENCY = ["0", "400", "0", "0", "200", "2"]
 EXCITATIONS = [["0", "999", "1", "00", "1", "0"]]
 RAD_PATTERN = ["0", "45", "181", "1000", "0", "0", "2", "2"]
 
