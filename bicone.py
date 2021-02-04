@@ -43,12 +43,12 @@ CONSTANTS = {
 COMMENTS = [
     "Bicone made with bicone.py",
     f"Origin: ({origin[0]:.3f}, {origin[1]:.3f}, {origin[2]:.3f})",
-    f"Cone offset: {cone_offset:.3f}m",
-    f"Cone angle: {theta:.3f}rads",
-    f"Cone length: {length:.3f}m",
+    f"Cone offset: {cone_offset:.3f} meters",
+    f"Cone angle: {theta:.3f} radians",
+    f"Cone length: {length:.3f} meters",
     f"Number of rings: {num_rings}",
     f"Number of rays: {num_rays}",
-    f"Cone initial radius: {init_rad:.3f}m",
+    f"Cone initial radius: {init_rad:.3f} meters",
 ]
 
 WIRES = [
@@ -68,7 +68,7 @@ WIRES = [
 
 FREQUENCY = ["0", "400", "0", "0", "200", "2"]
 EXCITATIONS = [["0", "999", "1", "00", "1", "0"]]
-RAD_PATTERN = ["0", "45", "181", "1000", "0", "0", "2", "2"]
+RAD_PATTERN = ["0", "18", "73", "0000", "0", "0", "5", "5"]
 
 
 def build_cone(axis, parity, wires=[]):
