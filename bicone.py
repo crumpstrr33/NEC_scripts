@@ -19,12 +19,12 @@ from math import pi
 from build_nec_file import build_nec_file
 
 cone_offset = 0.004
-num_rays = 10
-num_rings = 6
+num_rays = 25
+num_rings = 20
 theta = 40 * (pi / 180)  # In degrees to be converted
 length = 0.13
 init_rad = 0.007
-wire_rad = 0.004
+wire_rad = 0.001
 origin = (0.0, 0.0, 0.0)
 
 CONSTANTS = {
@@ -53,7 +53,7 @@ COMMENTS = [
 
 WIRES = [
     [
-        "999",
+        "9999",
         "1",
         "0",
         "init_rad",
@@ -119,7 +119,7 @@ def build_cone(axis, parity, wires=[]):
 
             wires.append(
                 [
-                    "1",  # Tag
+                    str(len(wires)),  # Tag
                     "1",  # Number of segments
                     "originx +" + axes[x][0],  # x init
                     "originy +" + axes[y][0],  # y init
@@ -152,7 +152,7 @@ def build_cone(axis, parity, wires=[]):
 
             wires.append(
                 [
-                    "1",  # Tag
+                    str(len(wires)),  # Tag
                     "1",  # Number of segments
                     "originx +" + axes[x][0],  # x init
                     "originy +" + axes[y][0],  # y init
@@ -171,4 +171,17 @@ if __name__ == "__main__":
     WIRES = build_cone("z", 0, WIRES)
     WIRES = build_cone("z", 1, WIRES)
 
-    build_nec_file(COMMENTS, WIRES, CONSTANTS, FREQUENCY, EXCITATIONS, RAD_PATTERN)
+    # lim_lens = [2, 6, 6, 15, 15, 15, 15, 15, 15, 15]
+    lim_lens = [2, 4, 5, 10, 10, 10, 10, 10, 10, 10]
+
+    build_nec_file(
+        comments=COMMENTS,
+        wires=WIRES,
+        constants=CONSTANTS,
+        frequency=FREQUENCY,
+        excitations=EXCITATIONS,
+        rad_pattern=RAD_PATTERN,
+        output="bicone",
+        lims=[sum(lim_lens[: ind + 1]) for ind in range(len(lim_lens))],
+        sig_figs=2,
+    )
