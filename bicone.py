@@ -14,18 +14,21 @@ the following parameters:
     init_rad: The inital radius of the cone (since it doesn't start at an exact point
                 like a cone mathematically would do)
 """
+import os
 from math import pi
 
 from build_nec_file import build_nec_file
 
 cone_offset = 0.004
-num_rays = 25
+num_rays = 20
 num_rings = 20
 theta = 40 * (pi / 180)  # In degrees to be converted
 length = 0.13
 init_rad = 0.007
 wire_rad = 0.001
 origin = (0.0, 0.0, 0.0)
+
+ex_tag = 9999
 
 CONSTANTS = {
     "originx": origin[0],
@@ -51,9 +54,9 @@ COMMENTS = [
     f"Cone initial radius: {init_rad:.3f} meters",
 ]
 
-WIRES = [
+INIT_WIRE = [
     [
-        "9999",
+        f"{ex_tag}",
         "1",
         "0",
         "init_rad",
@@ -66,9 +69,8 @@ WIRES = [
 ]
 
 
-FREQUENCY = ["0", "400", "0", "0", "200", "2"]
-EXCITATIONS = [["0", "999", "1", "00", "1", "0"]]
-RAD_PATTERN = ["0", "18", "73", "0000", "0", "0", "5", "5"]
+EXCITATIONS = [["0", f"{ex_tag}", "1", "00", "1", "0"]]
+RAD_PATTERN = ["0", "18", "73", "1000", "0", "0", "5", "5"]
 
 
 def build_cone(axis, parity, wires=[]):
@@ -80,6 +82,8 @@ def build_cone(axis, parity, wires=[]):
     partiy - Which direction to face, either 0 for negative or 1 for positive
     wires (default []) - The list of wires to add to
     """
+    # Do not edit in-place! Instead return the list of wires!
+    _wires = wires.copy()
     if parity not in [0, 1]:
         raise f"Please set parity to `1` or `0`, not {parity}."
     if axis not in ["x", "y", "z"]:
@@ -117,9 +121,9 @@ def build_cone(axis, parity, wires=[]):
             )
             axes = (prim_axis, sec1_axis, sec2_axis)
 
-            wires.append(
+            _wires.append(
                 [
-                    str(len(wires)),  # Tag
+                    str(len(_wires)),  # Tag
                     "1",  # Number of segments
                     "originx +" + axes[x][0],  # x init
                     "originy +" + axes[y][0],  # y init
@@ -150,9 +154,9 @@ def build_cone(axis, parity, wires=[]):
             )
             axes = (prim_axis, sec1_axis, sec2_axis)
 
-            wires.append(
+            _wires.append(
                 [
-                    str(len(wires)),  # Tag
+                    str(len(_wires)),  # Tag
                     "1",  # Number of segments
                     "originx +" + axes[x][0],  # x init
                     "originy +" + axes[y][0],  # y init
@@ -164,24 +168,30 @@ def build_cone(axis, parity, wires=[]):
                 ]
             )
 
-    return wires
+    return _wires
 
 
 if __name__ == "__main__":
-    WIRES = build_cone("z", 0, WIRES)
-    WIRES = build_cone("z", 1, WIRES)
+    path = "bicone"
+    if not os.path.isdir(path):
+        os.mkdir(path)
 
-    # lim_lens = [2, 6, 6, 15, 15, 15, 15, 15, 15, 15]
-    lim_lens = [2, 4, 5, 10, 10, 10, 10, 10, 10, 10]
+    for freq in range(2, 100, 25):
+        FREQUENCY = ["0", "1", "0", "0", f"{freq}", "1"]
 
-    build_nec_file(
-        comments=COMMENTS,
-        wires=WIRES,
-        constants=CONSTANTS,
-        frequency=FREQUENCY,
-        excitations=EXCITATIONS,
-        rad_pattern=RAD_PATTERN,
-        output="bicone",
-        lims=[sum(lim_lens[: ind + 1]) for ind in range(len(lim_lens))],
-        sig_figs=2,
-    )
+        WIRES = build_cone("z", 0, INIT_WIRE)
+        WIRES = build_cone("z", 1, WIRES)
+
+        lim_lens = [2, 4, 5, 10, 10, 10, 10, 10, 10, 10]
+
+        build_nec_file(
+            comments=COMMENTS,
+            wires=WIRES,
+            constants=CONSTANTS,
+            frequency=FREQUENCY,
+            excitations=EXCITATIONS,
+            rad_pattern=RAD_PATTERN,
+            output=os.path.join(path, f"bicone_{freq}MHz"),
+            lims=[sum(lim_lens[: ind + 1]) for ind in range(len(lim_lens))],
+            sig_figs=2,
+        )
