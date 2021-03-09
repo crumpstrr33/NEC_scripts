@@ -2,3 +2,7 @@ __pycache__
 
 *.nec
 *.log
+tmp.*
+temp.*
+tst.*
+test.*
