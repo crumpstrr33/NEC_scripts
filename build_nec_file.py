@@ -18,7 +18,7 @@ def build_nec_file(
     output="output",
     lims=[2, 5, 10, 20, 30, 40, 50, 60, 70, 80],
     sig_figs=2,
-    silent=False,
+    verbose=0,
 ):
     """
     Creates a `.nec` file. The values can contain arithmetic in it. Anything
@@ -50,9 +50,10 @@ def build_nec_file(
     sig_figs (default 2) - The number of significant figures used for the
         numbers written in scientific notation (i.e. how many digits after
         the decimal point).
-    silent (default False) - If true, will not print out anything, otherwise
-        will print out the comments in the .nec file, and info on the number
-        of wires, file location and time taken to create file.
+    verbose (default 2) - If 0, will not print out anything. If 1, will print out
+        just info on the number of wires, file location and time taken to create
+        file. If 2, will print out the comments in the .nec file, and info on the
+        number of wires, file location and time taken to create file.
     """
 
     # scinot_ind tells this function at which column of a row to
@@ -103,11 +104,12 @@ def build_nec_file(
         f.write("\n".join(nec_file))
     dt_end = dt.now()
 
-    if not silent:
-        print("Comments:")
-        for comment in comments:
-            print(" " * 8 + f"{comment}")
+    if verbose:
+        if verbose == 2:
+            print("\nComments:")
+            for comment in comments:
+                print(" " * 8 + f"{comment}")
         print(
-            f"\nWrote {len(wires)} wires to {output}.nec in "
+            f"Wrote {len(wires)} wires to {output}.nec in "
             + f"{(dt_end - dt_start).total_seconds() * 1000:.3f}ms."
         )
