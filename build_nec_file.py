@@ -91,11 +91,14 @@ def build_nec_file(
     # Wire end
     nec_file.append(f"GE{(lims[1] - lims[0] - 1)*' '}0")
     # Frequency
-    _format_rows(rows=[frequency], card="FR", scinot_ind=4)
+    if frequency:
+        _format_rows(rows=[frequency], card="FR", scinot_ind=4)
     # Excitations
-    _format_rows(rows=excitations, card="EX", scinot_ind=4)
+    if excitations:
+        _format_rows(rows=excitations, card="EX", scinot_ind=4)
     # Radation pattern,
-    _format_rows(rows=[rad_pattern], card="RP", scinot_ind=8)
+    if rad_pattern:
+        _format_rows(rows=[rad_pattern], card="RP", scinot_ind=8)
     # File end
     nec_file.append("EN\n")
 
