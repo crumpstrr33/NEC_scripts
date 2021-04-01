@@ -68,9 +68,9 @@ INIT_WIRE = [
     ],
 ]
 
-
+FREQUENCY = ["0", "200", "0", "0", "5", "5"]
+RADIATION = ["0", "91", "181", "1000", "0", "0", "2", "2"]
 EXCITATIONS = [["0", f"{ex_tag}", "1", "00", "1", "0"]]
-RAD_PATTERN = ["0", "18", "73", "1000", "0", "0", "5", "5"]
 
 
 def build_cone(axis, parity, wires=[]):
@@ -172,26 +172,23 @@ def build_cone(axis, parity, wires=[]):
 
 
 if __name__ == "__main__":
-    path = "bicone"
-    if not os.path.isdir(path):
-        os.mkdir(path)
+    # Length in number of chars for each column
+    lim_lens = [2, 4, 5, 10, 10, 10, 10, 10, 10, 10]
+    # How NEC2 wants it, i.e. as the char index of the start of each column
+    lim_lens = [sum(lim_lens[: ind + 1]) for ind in range(len(lim_lens))]
 
-    for freq in range(2, 100, 25):
-        FREQUENCY = ["0", "1", "0", "0", f"{freq}", "1"]
+    WIRES = build_cone("z", 0, INIT_WIRE)
+    WIRES = build_cone("z", 1, WIRES)
 
-        WIRES = build_cone("z", 0, INIT_WIRE)
-        WIRES = build_cone("z", 1, WIRES)
-
-        lim_lens = [2, 4, 5, 10, 10, 10, 10, 10, 10, 10]
-
-        build_nec_file(
-            comments=COMMENTS,
-            wires=WIRES,
-            constants=CONSTANTS,
-            frequency=FREQUENCY,
-            excitations=EXCITATIONS,
-            rad_pattern=RAD_PATTERN,
-            output=os.path.join(path, f"bicone_{freq}MHz"),
-            lims=[sum(lim_lens[: ind + 1]) for ind in range(len(lim_lens))],
-            sig_figs=2,
-        )
+    build_nec_file(
+        comments=COMMENTS,
+        wires=WIRES,
+        constants=CONSTANTS,
+        excitations=EXCITATIONS,
+        rad_pattern=RADIATION,
+        frequency=FREQUENCY,
+        output="custom_bicone",
+        lims=lim_lens,
+        sig_figs=2,
+        verbose=1,
+    )
