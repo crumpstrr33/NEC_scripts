@@ -14,14 +14,13 @@ the following parameters:
     init_rad: The inital radius of the cone (since it doesn't start at an exact point
                 like a cone mathematically would do)
 """
-import os
 from math import pi
 
 from build_nec_file import build_nec_file
 
 cone_offset = 0.004
-num_rays = 20
-num_rings = 20
+num_rays = 35
+num_rings = 35
 theta = 40 * (pi / 180)  # In degrees to be converted
 length = 0.13
 init_rad = 0.007
@@ -73,13 +72,17 @@ RADIATION = ["0", "91", "181", "1000", "0", "0", "2", "2"]
 EXCITATIONS = [["0", f"{ex_tag}", "1", "00", "1", "0"]]
 
 
-def build_cone(axis, parity, wires=[]):
+def build_cone(axis, parity, ray_segments=True, wires=[]):
     """
     Creates a cone in a direction along an axis.
 
     Parameters:
     axis - The axis which the cone is along, either `x`, `y`, `z`
-    partiy - Which direction to face, either 0 for negative or 1 for positive
+    parity - Which direction to face, either 0 for negative or 1 for positive
+    ray_segments (default True) - If True, the rays will be segmented between
+        each rings, i.e. each ray will be made up of `num_rings - 1` wires. If
+        False, each ray will just be made up of one wire with the value for
+        number of segments as `num_rings - 1`.
     wires (default []) - The list of wires to add to
     """
     # Do not edit in-place! Instead return the list of wires!
@@ -101,30 +104,62 @@ def build_cone(axis, parity, wires=[]):
     # Change in length between rings
     dlength = length / (num_rings - 1)
 
-    # Add the rays, create num_rings-1 wires for each ray, so each interaction
-    # point is of 4 wires. The offset*tan(theta) term compensates for the increase
-    # in height along the ray, the cosine and sine terms then appropriately rotate them
-    for ring_ind in range(num_rings - 1):
-        offsets = (f"{ring_ind * dlength}", f"{(ring_ind + 1) * dlength}")
+    if ray_segments:
+        # Add the rays, create num_rings-1 wires for each ray, so each interaction
+        # point is of 4 wires. The offset*tan(theta) term compensates for the increase
+        # in height along the ray, the cosine and sine terms then appropriately rotate them
+        for ring_ind in range(num_rings - 1):
+            offsets = (f"{ring_ind * dlength}", f"{(ring_ind + 1) * dlength}")
+            for ray_ind in range(num_rays):
+                prim_axis = (
+                    f"{neg}*(cone_offset + {offsets[0]})",
+                    f"{neg}*(cone_offset + {offsets[1]})",
+                )
+                sec1_axis = (
+                    f"({offsets[0]}*tan(theta) + init_rad)*cos({ray_ind*dtheta})",
+                    f"({offsets[1]}*tan(theta) + init_rad)*cos({ray_ind*dtheta})",
+                )
+                sec2_axis = (
+                    f"({offsets[0]}*tan(theta) + init_rad)*sin({ray_ind*dtheta})",
+                    f"({offsets[1]}*tan(theta) + init_rad)*sin({ray_ind*dtheta})",
+                )
+                axes = (prim_axis, sec1_axis, sec2_axis)
+
+                _wires.append(
+                    [
+                        str(len(_wires)),  # Tag
+                        "1",  # Number of segments
+                        "originx +" + axes[x][0],  # x init
+                        "originy +" + axes[y][0],  # y init
+                        "originz +" + axes[z][0],  # z init
+                        "originx +" + axes[x][1],  # x final
+                        "originy +" + axes[y][1],  # y final
+                        "originz +" + axes[z][1],  # z final
+                        "wire_rad",  # Wire radius
+                    ]
+                )
+    else:
+        # Create rays as just one wire instead. The same except `offset` is just zeros.
+        offset = f"{(num_rays - 1) * dlength}"
         for ray_ind in range(num_rays):
             prim_axis = (
-                f"{neg}*(cone_offset + {offsets[0]})",
-                f"{neg}*(cone_offset + {offsets[1]})",
+                f"{neg}*cone_offset",
+                f"{neg}*(cone_offset + {offset})",
             )
             sec1_axis = (
-                f"({offsets[0]}*tan(theta) + init_rad)*cos({ray_ind*dtheta})",
-                f"({offsets[1]}*tan(theta) + init_rad)*cos({ray_ind*dtheta})",
+                f"init_rad*cos({ray_ind*dtheta})",
+                f"({offset}*tan(theta) + init_rad)*cos({ray_ind*dtheta})",
             )
             sec2_axis = (
-                f"({offsets[0]}*tan(theta) + init_rad)*sin({ray_ind*dtheta})",
-                f"({offsets[1]}*tan(theta) + init_rad)*sin({ray_ind*dtheta})",
+                f"init_rad*sin({ray_ind*dtheta})",
+                f"({offset}*tan(theta) + init_rad)*sin({ray_ind*dtheta})",
             )
             axes = (prim_axis, sec1_axis, sec2_axis)
 
             _wires.append(
                 [
                     str(len(_wires)),  # Tag
-                    "1",  # Number of segments
+                    str(num_rings - 1),  # Number of segments
                     "originx +" + axes[x][0],  # x init
                     "originy +" + axes[y][0],  # y init
                     "originz +" + axes[z][0],  # z init
@@ -177,8 +212,8 @@ if __name__ == "__main__":
     # How NEC2 wants it, i.e. as the char index of the start of each column
     lim_lens = [sum(lim_lens[: ind + 1]) for ind in range(len(lim_lens))]
 
-    WIRES = build_cone("z", 0, INIT_WIRE)
-    WIRES = build_cone("z", 1, WIRES)
+    WIRES = build_cone(axis="z", parity=0, wires=INIT_WIRE)
+    WIRES = build_cone(axis="z", parity=1, wires=WIRES)
 
     build_nec_file(
         comments=COMMENTS,
@@ -187,7 +222,7 @@ if __name__ == "__main__":
         excitations=EXCITATIONS,
         rad_pattern=RADIATION,
         frequency=FREQUENCY,
-        output="custom_bicone",
+        output="bicone_3030",
         lims=lim_lens,
         sig_figs=2,
         verbose=1,
